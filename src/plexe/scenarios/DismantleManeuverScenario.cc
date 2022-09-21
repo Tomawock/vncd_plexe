@@ -28,7 +28,7 @@ void DismantleManeuverScenario::initialize(int stage)
 {
     BaseScenario::initialize(stage);
 
-    if (stage == 2) {
+    if (stage == 1) {
         app = FindModule<DismantlePlatooningApp*>::findSubModule(getParentModule());
         prepareManeuverCars(0);
     }
@@ -47,6 +47,7 @@ void DismantleManeuverScenario::prepareManeuverCars(int platoonLane)
 
     const int desiredPlatoonSpeed = par("desiredPlatoonSpeed").intValue();
     const int desiredOtherCarSpeed = par("desiredOtherCarSpeed").intValue();
+    distanceDismantle = par("distanceDismantle").intValue();
 
     if (positionHelper->getId()%numberOfCarsPerPlatoon == 0 && positionHelper->getId() < numberOfCars) {
         // this is the leader of the platoon ahead
@@ -63,9 +64,9 @@ void DismantleManeuverScenario::prepareManeuverCars(int platoonLane)
         if (positionHelper->getId() < numberOfCars)
         {
             // these are the followers which are already in the platoon
-            plexeTraciVehicle->setCruiseControlDesiredSpeed(130.0 / 3.6);
+            plexeTraciVehicle->setCruiseControlDesiredSpeed(desiredPlatoonSpeed / 3.6);
             plexeTraciVehicle->setActiveController(followerController);
-            plexeTraciVehicle->setFixedLane(0); // all the platoons will be on the first lane
+            plexeTraciVehicle->setFixedLane(platoonLane); // all the platoons will be on the first lane
             app->setPlatoonRole(PlatoonRole::FOLLOWER);
         }
     }

@@ -60,7 +60,6 @@ void DismantlePlatooningApp::onManeuverMessage(ManeuverMessage* mm)
 
 void DismantlePlatooningApp::startDismantleManeuver(int platoonId, int leaderId)
 {
-    std::cout<<"test"<<std::endl;
     ASSERT(getPlatoonRole() == PlatoonRole::NONE);
     ASSERT(!isInManeuver());
 

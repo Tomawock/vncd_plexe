@@ -27,10 +27,10 @@ public:
     virtual void startManeuver(const void* parameters) override;
 
     /** initializes the handling of a WarnDisamntle */
-    bool handleWarnDismantle(const WarnDismantle* msg);
+    void handleWarnDismantle(const WarnDismantle* msg);
 
     /** initializes the handling of a WarnDisamntle */
-    bool handleWarnDismantleAck(const WarnDismantleAck* msg);
+    void handleWarnDismantleAck(const WarnDismantleAck* msg);
 
     void handleAbort();
 
@@ -67,8 +67,10 @@ protected:
 
 
 private:
-//    void sendDismantleRequest(int leaderId, std::string externalId, int platoonId);
+    void resetReceivedAck();
+    void sendDismantleRequest(int leaderId, std::string externalId, int platoonId);
     int securityDistance;
+    std::map<int, bool> receivedAck;
 };
 
 } // namespace plexe

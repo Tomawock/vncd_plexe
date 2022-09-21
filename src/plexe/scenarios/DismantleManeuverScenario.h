@@ -40,6 +40,7 @@ public:
 
 private:
     ACTIVE_CONTROLLER getEnum(const char* str);
+    int distanceDismantle;
 public:
     DismantleManeuverScenario()
     {

@@ -1,0 +1,2 @@
+4955->	Send start manover to all
+6632->	ALL ACK RECIVED FROM WAIT_REPLY
