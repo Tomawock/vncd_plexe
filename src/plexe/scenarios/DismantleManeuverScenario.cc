@@ -47,7 +47,6 @@ void DismantleManeuverScenario::prepareManeuverCars(int platoonLane)
 
     const int desiredPlatoonSpeed = par("desiredPlatoonSpeed").intValue();
     const int desiredOtherCarSpeed = par("desiredOtherCarSpeed").intValue();
-    distanceDismantle = par("distanceDismantle").intValue();
 
     if (positionHelper->getId()%numberOfCarsPerPlatoon == 0 && positionHelper->getId() < numberOfCars) {
         // this is the leader of the platoon ahead
@@ -58,7 +57,8 @@ void DismantleManeuverScenario::prepareManeuverCars(int platoonLane)
 
         // after 3 seconds of simulation, start the maneuver
         startManeuver = new cMessage();
-        scheduleAt(simTime() + SimTime(meneuverTime), startManeuver);
+        destroyManeuver = new cMessage();
+        scheduleAt(simTime() + SimTime(meneuverTime), destroyManeuver);
     }
     else if (!positionHelper->isLeader()) {
         if (positionHelper->getId() < numberOfCars)
@@ -69,6 +69,11 @@ void DismantleManeuverScenario::prepareManeuverCars(int platoonLane)
             plexeTraciVehicle->setFixedLane(platoonLane); // all the platoons will be on the first lane
             app->setPlatoonRole(PlatoonRole::FOLLOWER);
         }
+        else {
+            plexeTraciVehicle->setCruiseControlDesiredSpeed(desiredOtherCarSpeed / 3.6);
+            plexeTraciVehicle->setActiveController(otherCarController);
+            plexeTraciVehicle->setFixedLane(1);
+        }
     }
 }
 
@@ -76,12 +81,15 @@ DismantleManeuverScenario::~DismantleManeuverScenario()
 {
     cancelAndDelete(startManeuver);
     startManeuver = nullptr;
+    cancelAndDelete(destroyManeuver);
+    destroyManeuver = nullptr;
 }
 
 void DismantleManeuverScenario::handleSelfMsg(cMessage* msg)
 {
     BaseScenario::handleSelfMsg(msg);
     if (msg == startManeuver) app->startDismantleManeuver(0, 0);
+    if (msg == destroyManeuver) app->startDismantleManeuver(1, 0);
 }
 
 ACTIVE_CONTROLLER DismantleManeuverScenario::getEnum(const char* str)

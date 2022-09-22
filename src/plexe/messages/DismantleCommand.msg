@@ -11,36 +11,16 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
+cplusplus{{
+#include "ManeuverMessage_m.h"
+}};
 
-package org.car2x.plexe.apps;
+packet ManeuverMessage;
 
-import org.car2x.plexe.apps.BaseApp;
-
-simple DismantlePlatooningApp like BaseApp {
-
-parameters:
-
-    // implementation of the dismantle maneuver
-    string dismantle;
-    
-	string joinManeuver;
-	
-	string mergeManeuver;
-	
-	int dismantleDistance;
-	
-	string dismantleController;
-	
-	double decelleration;
-
-    int headerLength @unit("bit") = default(0 bit);
-    @display("i=block/app2");
-    @class(plexe::DismantlePlatooningApp);
-
-gates:
-    input lowerLayerIn;
-    output lowerLayerOut;
-    input lowerControlIn;
-    output lowerControlOut;
+// Request to a platoon to start the dismantle.
+// Is sent from a leader of platoon to all platoon members.
+packet DismantleCommand extends ManeuverMessage {
+    // the distance in meters of the safe distance that everyone need to reach
+    bool dismantle;
 }

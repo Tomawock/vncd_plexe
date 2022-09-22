@@ -23,5 +23,5 @@ packet ManeuverMessage;
 // Is sent from a leader of platoon to all platoon members.
 packet WarnDismantle extends ManeuverMessage {
     // the distance in meters of the safe distance that everyone need to reach
-    int safeDistance;
+    int dismantleDistance;
 }

@@ -31,7 +31,6 @@ simple DismantleManeuverScenario extends BBaseScenario
         int numberOfCarsPerPlatoon;
         
         int meneuverTime;
-        int distanceDismantle;
         
         int desiredPlatoonSpeed;
         int desiredOtherCarSpeed;

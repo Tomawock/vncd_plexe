@@ -31,6 +31,9 @@ class DismantleManeuverScenario : public BaseScenario {
 protected:
     // message used to start the maneuver
     cMessage* startManeuver;
+
+    // message used to start the maneuver
+    cMessage* destroyManeuver;
     // pointer to protocol
     DismantlePlatooningApp* app;
 public:
@@ -40,11 +43,11 @@ public:
 
 private:
     ACTIVE_CONTROLLER getEnum(const char* str);
-    int distanceDismantle;
 public:
     DismantleManeuverScenario()
     {
         startManeuver = nullptr;
+        destroyManeuver = nullptr;
         app = nullptr;
     }
     virtual ~DismantleManeuverScenario();

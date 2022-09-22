@@ -37,10 +37,15 @@ void DismantlePlatooningApp::initialize(int stage)
 
     if (stage == 1) {
         std::string dismantleManeuverName = par("dismantle").stdstringValue();
-        if (dismantleManeuverName == "dismantle")
-            dismantleManeuver = new Dismantle(this, par("securityDistance").intValue());
-        else
+
+        if (dismantleManeuverName == "dismantle"){
+            dismantleManeuver = new Dismantle(this,
+                    par("dismantleDistance").intValue(),
+                    getEnum(par("dismantleController").stringValue()),
+                    par("decelleration").doubleValue());
+        }else {
             throw new cRuntimeError("Invalid Dismantle maneuver implementation chosen");
+        }
     }
 }
 
@@ -62,8 +67,12 @@ void DismantlePlatooningApp::startDismantleManeuver(int platoonId, int leaderId)
 {
     ASSERT(getPlatoonRole() == PlatoonRole::NONE);
     ASSERT(!isInManeuver());
+    if (platoonId != 0){
+        dismantleManeuver->startManeuver(nullptr);
+    }else{
+        dismantleManeuver->startManeuver(nullptr);
+    }
 
-    dismantleManeuver->startManeuver(nullptr);
 }
 
 
@@ -91,9 +100,48 @@ void DismantlePlatooningApp::resetTimeoutMsg()
     cancelAndDelete(timeoutMsg);
 }
 
+void DismantlePlatooningApp::sendTimeoutAccelleration()
+{
+    accellerationMsg = new cMessage("AccellerationMsg");
+    take(accellerationMsg);
+    scheduleAt(simTime() + SimTime(0.1), accellerationMsg);
+}
+
+
+void DismantlePlatooningApp::handleSelfMsg(cMessage* msg)
+{
+    if (dismantleManeuver && dismantleManeuver->handleSelfMsg(msg)) return;
+    BaseApp::handleSelfMsg(msg);
+}
+
+void DismantlePlatooningApp::resetTimeoutAccelleration()
+{
+    cancelAndDelete(accellerationMsg);
+}
+
 DismantlePlatooningApp::~DismantlePlatooningApp()
 {
     delete dismantleManeuver;
+}
+ACTIVE_CONTROLLER DismantlePlatooningApp::getEnum(const char* str)
+{
+    if (strcmp(str, "ACC") == 0) {
+        return ACTIVE_CONTROLLER::ACC;
+    } else if (strcmp(str, "CACC") == 0) {
+        return ACTIVE_CONTROLLER::CACC;
+    } else if (strcmp(str, "PLOEG") == 0) {
+        return ACTIVE_CONTROLLER::PLOEG;
+    } else if (strcmp(str, "CONSENSUS") == 0) {
+        return ACTIVE_CONTROLLER::CONSENSUS;
+    } else if (strcmp(str, "FLATBED") == 0) {
+        return ACTIVE_CONTROLLER::FLATBED;
+    } else if (strcmp(str, "DRIVER") == 0) {
+        return ACTIVE_CONTROLLER::DRIVER;
+    } else if (strcmp(str, "FAKED_CACC") == 0) {
+        return ACTIVE_CONTROLLER::FAKED_CACC;
+    } else {
+        throw cRuntimeError("Invalid controller selected");
+    }
 }
 
 } // namespace plexe

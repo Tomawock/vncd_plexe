@@ -51,6 +51,7 @@ public:
      * @param parameters parameters passed to the maneuver
      */
     virtual void startManeuver(const void* parameters) = 0;
+
     /**
      * This method is invoked by the generic application to abort the maneuver
      */
@@ -73,6 +74,16 @@ public:
      * The manuever must not free the memory of the message, as this might be needed by other maneuvers as well.
      */
     virtual void onFailedTransmissionAttempt(const ManeuverMessage* mm) = 0;
+
+    /**
+     * Invoked by the GeneralPlatooningApp to notify maneuvers about self messages.
+     * If the self message is handled by the maneuver, it should return true. If not it should return false and the message is passed over to the next maneuver.
+     * If no maneuver handles the self message, it is passed to BaseApp::handleSelfMsg().
+     */
+    virtual bool handleSelfMsg(cMessage* msg)
+    {
+        return false;
+    }
 
 protected:
     GeneralPlatooningApp* app;

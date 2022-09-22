@@ -1,2 +1,5 @@
-4955->	Send start manover to all
-6632->	ALL ACK RECIVED FROM WAIT_REPLY
+6728 -> first start manuver
+5013 -> first messagge recived by first follwer
+4955 ->	Send start manover to all
+6632 ->	ALL ACK RECIVED FROM WAIT_REPLY
+83110 -> 

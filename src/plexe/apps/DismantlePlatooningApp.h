@@ -48,7 +48,6 @@ public:
     DismantlePlatooningApp()
         : GeneralPlatooningApp()
         , dismantleManeuver(nullptr)
-
     {
     }
 
@@ -63,6 +62,10 @@ public:
     void sendTimeoutMsg();
 
     void resetTimeoutMsg();
+
+    void sendTimeoutAccelleration();
+
+    void resetTimeoutAccelleration();
 
 protected:
     /** used to receive the "retries exceeded" signal **/
@@ -82,14 +85,20 @@ protected:
      */
     virtual void onManeuverMessage(ManeuverMessage* mm);
 
+    virtual void handleSelfMsg(cMessage* msg) override;
 
 
 private:
+    ACTIVE_CONTROLLER getEnum(const char* str);
+
     /** platoons change lane implementation */
     Maneuver* dismantleManeuver;
 
     // message used to schedule timeouts
     cMessage* timeoutMsg;
+
+    // message used to schedule timeouts
+    cMessage* accellerationMsg;
 };
 
 } // namespace plexe
