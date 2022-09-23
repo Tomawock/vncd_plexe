@@ -56,6 +56,7 @@ void DismantleManeuverScenario::prepareManeuverCars(int platoonLane)
         app->setPlatoonRole(PlatoonRole::LEADER);
 
         // after 3 seconds of simulation, start the maneuver
+        // TODO CHANGE FOR DESTROY
         startManeuver = new cMessage();
         destroyManeuver = new cMessage();
         scheduleAt(simTime() + SimTime(meneuverTime), destroyManeuver);

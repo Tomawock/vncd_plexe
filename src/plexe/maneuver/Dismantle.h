@@ -14,6 +14,8 @@
 #include "plexe/messages/DismantleCommand_m.h"
 #include "plexe/messages/DismantleAck_m.h"
 
+#include "plexe/messages/Destroy_m.h"
+
 
 using namespace veins;
 
@@ -28,6 +30,8 @@ public:
     virtual void startManeuver(const void* parameters) override;
 
     void destroyManeuver();
+
+    void handleDestroy(const Destroy* msg);
 
     /** initializes the handling of a WarnDisamntle */
     void handleWarnDismantle(const WarnDismantle* msg);

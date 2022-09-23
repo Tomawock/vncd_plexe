@@ -10,6 +10,8 @@
 #include "plexe/messages/DismantleCommand_m.h"
 #include "plexe/messages/DismantleAck_m.h"
 
+#include "plexe/messages/Destroy_m.h"
+
 // TODO NOT IMPLEMNTED ALL THE ABORT and all the case in whitch they are needed
 
 namespace plexe {
@@ -38,19 +40,36 @@ bool Dismantle::handleSelfMsg(cMessage* msg)
 
 void Dismantle::destroyManeuver()
 {
+    for (int i: positionHelper->getPlatoonFormation())
+    {
+        if (i != positionHelper->getLeaderId())
+        {
+            EV_INFO << positionHelper->getId() << " sending DESTROY to " << i << "\n";
+            Destroy* msg = new Destroy("Destroy"); // send dismantle distance to reach
+           app->fillManeuverMessage(msg, positionHelper->getId(), positionHelper->getExternalId(), positionHelper->getPlatoonId(), i);
+           app->sendUnicast(msg, i);
+        }
+    }
+    plexeTraciVehicle->removePlatoonMember(positionHelper->getExternalId());
+//    EV_INFO << "N:\t" << positionHelper->getPlatoonSize() << "\tEXID:\t" << positionHelper->getExternalId() << endl;
     plexeTraciVehicle->setActiveController(dismantleController);
-    plexeTraciVehicle->setFixedLane(-1);
+}
+
+void Dismantle::handleDestroy(const Destroy* msg){
+    plexeTraciVehicle->removePlatoonMember(positionHelper->getExternalId());
+//    EV_INFO << "N:\t" << positionHelper->getPlatoonSize() << "\tEXID:\t" << positionHelper->getExternalId() << endl;
+    plexeTraciVehicle->setActiveController(dismantleController);
 }
 
 void Dismantle::startManeuver(const void* parameters)
 {
-    destroyManeuver();
-//    if (initializeDismantleManeuver())
-//    {
-//        resetReceivedAck();
-//        // send Dismantle request to all followers
-//        sendDismantleRequest(positionHelper->getId(), positionHelper->getExternalId(), positionHelper->getPlatoonId());
-//    }
+//    destroyManeuver();
+    if (initializeDismantleManeuver())
+    {
+        resetReceivedAck();
+        // send Dismantle request to all followers
+        sendDismantleRequest(positionHelper->getId(), positionHelper->getExternalId(), positionHelper->getPlatoonId());
+    }
 }
 
 void Dismantle::resetReceivedAck() {
@@ -191,7 +210,7 @@ void Dismantle::handleMoveToSafeDistance(const MoveToSafeDistance* msg)
         int platoonPosition = positionHelper->getPosition();
         // compute decelleration
         // farla variare ad ogni 0.1 per essere piu precisi
-        double actual_accelleration = (distance - dismantleDistance) / (msg->getMoveToSafeDistanceAccelleration() * msg->getMoveToSafeDistanceAccelleration());
+        double actual_accelleration = 2 * (distance - dismantleDistance) / (msg->getMoveToSafeDistanceAccelleration() * msg->getMoveToSafeDistanceAccelleration());
 //        msg->getMoveToSafeDistanceAccelleration()*platoonPosition
         plexeTraciVehicle->setFixedAcceleration(1,actual_accelleration * platoonPosition);
         static_cast<DismantlePlatooningApp*>(app)->sendTimeoutAccelleration();  // send self message in order to arrive to a safe distance
@@ -247,7 +266,8 @@ bool Dismantle::processSafeDistanceAccelleration()
     if(distance > dismantleDistance)
     {
         EV_INFO <<"SAFE DISTANCE REACHED\t"<< distance << endl;
-        plexeTraciVehicle->setFixedAcceleration(0,0.0);
+        plexeTraciVehicle->setFixedAcceleration(1,0.0);
+//        plexeTraciVehicle->setCruiseControlDesiredSpeed(100 / 3.6);
         static_cast<DismantlePlatooningApp*>(app)->resetTimeoutAccelleration();
         dismantleManeuverState = DismantleManeuverState::DISMANTLE;
         return false;
@@ -330,6 +350,7 @@ bool Dismantle::processDismantleCommand(const DismantleCommand* msg)
 
     EV_INFO << "DISMANTLE COMMAND RECIVED" << endl;
 
+    plexeTraciVehicle->removePlatoonMember(positionHelper->getExternalId());
     plexeTraciVehicle->setActiveController(dismantleController);
     plexeTraciVehicle->setFixedLane(-1);
 //    plexeTraciVehicle->setCruiseControlDesiredSpeed(200 / 3.6);
@@ -344,11 +365,13 @@ bool Dismantle::processDismantleCommand(const DismantleCommand* msg)
 void Dismantle::handleDismantleAck(const DismantleAck* msg)
 {
     if (processDismantleAck(msg)) {
-        EV_INFO << "INITIAL SIZE PLATOON\t" << positionHelper->getPlatoonSize() << endl;
-        // remove all elements from platoon
-        std::vector<int> newFormation{};
-        positionHelper->setPlatoonFormation(newFormation);
-        EV_INFO << "FINAL SIZE PLATOON\t" << positionHelper->getPlatoonSize() << endl;
+//        does not change a lot
+//        EV_INFO << "INITIAL SIZE PLATOON\t" << positionHelper->getPlatoonSize() << endl;
+//        // remove all elements from platoon
+//        std::vector<int> newFormation{};
+//        positionHelper->setPlatoonFormation(newFormation);
+//        EV_INFO << "FINAL SIZE PLATOON\t" << positionHelper->getPlatoonSize() << endl;
+        plexeTraciVehicle->removePlatoonMember(positionHelper->getExternalId());
         plexeTraciVehicle->setActiveController(dismantleController);
         plexeTraciVehicle->setFixedLane(-1);
     }
@@ -413,6 +436,8 @@ void Dismantle::onManeuverMessage(const ManeuverMessage* mm)
         handleDismantleCommand(msg);
     } else if (const DismantleAck* msg = dynamic_cast<const DismantleAck*>(mm)) {
         handleDismantleAck(msg);
+    } else if  (const Destroy* msg = dynamic_cast<const Destroy*>(mm)) {
+        handleDestroy(msg);
     }
 }
 

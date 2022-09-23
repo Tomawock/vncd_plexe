@@ -26,3 +26,4 @@ subprojects/plexe_catch/src/*.so
 subprojects/plexe_catch/src/Makefile
 subprojects/plexe_catch/src/plexe_catch
 subprojects/plexe_catch/src/plexe_catch_dbg
+/.computed/
